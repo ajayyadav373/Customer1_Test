@@ -43,17 +43,6 @@ resource "azurerm_network_interface" "ni_test" {
   }
 }
 
-resource "azurerm_network_interface" "ni_test1" {
-  name                = "Ajay_Net_Int1"
-  location            = "${var.location}"
-  resource_group_name = "${azurerm_resource_group.rg_test.name}"
-
-  ip_configuration {
-    name                          = "Ajay_testipconf1"
-    subnet_id                     = "${azurerm_subnet.subnet3.id}"
-    private_ip_address_allocation = "dynamic"
-  }
-}
 
 resource "azurerm_managed_disk" "test_disk" {
   name                 = "datadisk_existing"
@@ -64,14 +53,6 @@ resource "azurerm_managed_disk" "test_disk" {
   disk_size_gb         = "10"
 }
 
-resource "azurerm_managed_disk" "test_disk1" {
-  name                 = "datadisk_existing1"
-  location             = "${var.location}"
-  resource_group_name  = "${azurerm_resource_group.rg_test.name}"
-  storage_account_type = "Standard_LRS"
-  create_option        = "Empty"
-  disk_size_gb         = "10"
-}
 
 resource "azurerm_virtual_machine" "Test_VM" {
   name                  = "Test_Ajay_Terraform"
@@ -125,55 +106,3 @@ resource "azurerm_virtual_machine" "Test_VM" {
   }
 }
 
-
-resource "azurerm_virtual_machine" "Test_VM1" {
-  name                  = "Test_Ajay_Terraform1"
-  location              = "${var.location}"
-  resource_group_name   = "${azurerm_resource_group.rg_test.name}"
-  network_interface_ids = ["${azurerm_network_interface.ni_test1.id}"]
-  vm_size               = "Standard_DS1_v2"
-
-  storage_image_reference {
-    publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "16.04-LTS"
-    version   = "latest"
-  }
-
-  storage_os_disk {
-    name              = "myosdisk2"
-    caching           = "ReadWrite"
-    create_option     = "FromImage"
-    managed_disk_type = "Standard_LRS"
-  }
-
-  storage_data_disk {
-    name              = "datadisk_new2"
-    managed_disk_type = "Standard_LRS"
-    create_option     = "Empty"
-    lun               = 0
-    disk_size_gb      = "1023"
-  }
-
-  storage_data_disk {
-    name            = "${azurerm_managed_disk.test_disk1.name}"
-    managed_disk_id = "${azurerm_managed_disk.test_disk1.id}"
-    create_option   = "Attach"
-    lun             = 1
-    disk_size_gb    = "${azurerm_managed_disk.test_disk1.disk_size_gb}"
-  }
-
-  os_profile {
-    computer_name  = "hostname2"
-    admin_username = "testadmin"
-    admin_password = "Password1234!"
-  }
-
-  os_profile_linux_config {
-    disable_password_authentication = false
-  }
-
-  tags {
-    environment = "test"
-  }
-}
